@@ -196,3 +196,51 @@
         padding: 1rem;
     }
 }
+
+/* ==== ESTILOS GLOBALES PARA IMPRESIÓN (PDF) ==== */
+@media print {
+    @page {
+        margin: 0;
+        /* Al forzar 0, el navegador entiende que NO tiene espacio para sus watermarks de URL/Fecha */
+        size: auto;
+    }
+
+    body {
+        margin: 1.5cm;
+        /* Movemos el "margen visual" para que no quede pegado al extremo absoluto de la hoja */
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    body,
+    html,
+    #root {
+        height: auto !important;
+        overflow: visible !important;
+        background-color: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .mobile-header,
+    .sidebar,
+    .sidebar-overlay,
+    .mobile-close-btn {
+        display: none !important;
+    }
+
+    .dashboard-layout,
+    .main-content,
+    .main-content-inner {
+        display: block !important;
+        position: static !important;
+        height: auto !important;
+        width: 100% !important;
+        max-width: none !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}

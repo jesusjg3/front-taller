@@ -49,7 +49,13 @@ const StepClient = ({ onNext, formData, setFormData }) => {
             onNext();
         } catch (error) {
             console.error("Error creando cliente:", error);
-            alert("Error al crear cliente. Verifique los datos.");
+            let msg = "Error al crear cliente. Verifique los datos.";
+            if (error.response?.data?.errors) {
+                msg = Object.values(error.response.data.errors).flat().join('\n');
+            } else if (error.response?.data?.message) {
+                msg = error.response.data.message;
+            }
+            alert(msg);
         } finally {
             setLoading(false);
         }
