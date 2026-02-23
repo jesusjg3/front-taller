@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { User, Phone, UserCheck, Car, Calendar, Wrench, ArrowLeft, Edit } from 'lucide-react';
+import { User, Phone, UserCheck, Car, Calendar, Wrench, ArrowLeft, Edit, Trash2 } from 'lucide-react';
 import axios from '../api/axios';
 
 const ClientDetail = () => {
@@ -56,22 +56,73 @@ const ClientDetail = () => {
         }
     };
 
+    const [isEditingVehicle, setIsEditingVehicle] = useState(false);
+    const [selectedVehicle, setSelectedVehicle] = useState(null);
+    const [vehicleForm, setVehicleForm] = useState({
+        brand: '',
+        model: '',
+        year: '',
+        plate: '',
+        kilometraje: ''
+    });
+
     if (loading) return <div className="p-8 text-center text-gray-500">Cargando detalles del cliente...</div>;
     if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
     if (!client) return <div className="p-8 text-center text-gray-500">Cliente no encontrado.</div>;
 
-    // Flatten history from all vehicles
+    const handleEditVehicleClick = (vehicle) => {
+        setSelectedVehicle(vehicle);
+        setVehicleForm({
+            brand: vehicle.brand || '',
+            model: vehicle.model || '',
+            year: vehicle.year || '',
+            plate: vehicle.plate || '',
+            kilometraje: vehicle.kilometraje || ''
+        });
+        setIsEditingVehicle(true);
+    };
+
+    const handleSaveVehicle = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.put(`/vehicles/${selectedVehicle.id}`, { ...vehicleForm, client_id: client.id });
+            const updatedVehicles = client.vehicles.map(v => v.id === selectedVehicle.id ? { ...v, ...vehicleForm } : v);
+            setClient({ ...client, vehicles: updatedVehicles });
+            setIsEditingVehicle(false);
+            alert("Vehículo actualizado correctamente.");
+        } catch (error) {
+            console.error("Error updating vehicle:", error);
+            const msg = error.response?.data?.message || "Error al actualizar el vehículo.";
+            alert(msg);
+        }
+    };
+
+    const handleDeleteVehicle = async (vehicleId) => {
+        if (!window.confirm("¿Seguro que desea eliminar este vehículo? Los registros de mantenimiento se preservarán.")) return;
+        try {
+            await axios.delete(`/vehicles/${vehicleId}`);
+            const updatedClientVehicles = client.vehicles.map(v => v.id === vehicleId ? { ...v, deleted_at: new Date().toISOString() } : v);
+            setClient({ ...client, vehicles: updatedClientVehicles });
+        } catch (error) {
+            console.error("Error deleting vehicle:", error);
+            const msg = error.response?.data?.message || "Error al eliminar el vehículo.";
+            alert(msg);
+        }
+    };
+
     const allMaintenances = client.vehicles ? client.vehicles.flatMap(v =>
         v.maintenances ? v.maintenances.map(m => ({
             ...m,
             vehicle_plate: v.plate,
-            vehicle_model: `${v.brand} ${v.model}`
+            vehicle_model: `${v.brand} ${v.model}`,
+            vehicle_id: v.id
         })) : []
     ).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) : [];
 
     // For the main display, we can show the first vehicle or a list.
     // Let's stick to the current design but iterate if multiple vehicles exist.
-    const vehicles = client.vehicles || [];
+    // We filter out soft-deleted vehicles from the active display list.
+    const vehicles = client.vehicles ? client.vehicles.filter(v => !v.deleted_at) : [];
 
     return (
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }} className="relative">
@@ -88,7 +139,7 @@ const ClientDetail = () => {
             </div>
 
             {/* Tarjeta Principal: Info Cliente */}
-            <div className="bg-white rounded-2xl p-8 shadow-sm mb-8 grid grid-cols-1 md:grid-cols-2 gap-8 border border-gray-100">
+            <div className="bg-white rounded-2xl shadow-sm mb-8 grid grid-cols-1 md:grid-cols-2 gap-8 border border-gray-100" style={{ padding: '2.5rem' }}>
                 {/* Columna Cliente */}
                 <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -104,7 +155,7 @@ const ClientDetail = () => {
                         </button>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingLeft: '1.5rem' }}>
                         <div>
                             <p style={{ color: '#888', fontSize: '0.9rem' }}>Nombre Completo</p>
                             <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>{client.name}</p>
@@ -140,24 +191,39 @@ const ClientDetail = () => {
                         {vehicles.length === 0 ? (
                             <p className="text-gray-500 italic">No hay vehículos registrados.</p>
                         ) : (
-                            vehicles.map(vehicle => (
-                                <div key={vehicle.id} className="bg-gray-50 p-4 rounded-xl border border-gray-100 client-vehicle-card">
-                                    <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2b2828', marginBottom: '0.5rem' }}>
-                                        {vehicle.brand} {vehicle.model}
-                                    </h3>
-                                    <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-                                        <span className="bg-slate-200 text-slate-700 px-2 py-1 rounded text-sm font-bold">
-                                            {vehicle.plate}
-                                        </span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#666', fontSize: '0.9rem' }}>
-                                            <Calendar size={14} /> {vehicle.year}
-                                        </span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#666', fontSize: '0.9rem' }}>
-                                            <Wrench size={14} /> {vehicle.kilometraje ? `${vehicle.kilometraje} km` : 'N/A'}
-                                        </span>
+                            vehicles.map(vehicle => {
+                                const latestMaintenance = allMaintenances.find(m => m.vehicle_id === vehicle.id);
+                                const proxKms = latestMaintenance?.prox_kilometraje;
+                                return (
+                                    <div key={vehicle.id} className="bg-gray-50 p-4 rounded-xl border border-gray-100 client-vehicle-card">
+                                        <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2b2828', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            {vehicle.brand} {vehicle.model}
+                                            <button onClick={() => handleEditVehicleClick(vehicle)} className="p-1 text-gray-400 hover:text-orange-600 transition-colors ml-2" title="Editar">
+                                                <Edit size={16} />
+                                            </button>
+                                            <button onClick={() => handleDeleteVehicle(vehicle.id)} className="p-1 text-gray-400 hover:text-red-600 transition-colors" title="Eliminar">
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </h3>
+                                        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                                            <span className="bg-slate-200 text-slate-700 px-2 py-1 rounded text-sm font-bold">
+                                                {vehicle.plate}
+                                            </span>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#666', fontSize: '0.9rem' }}>
+                                                <Calendar size={14} /> {vehicle.year}
+                                            </span>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#666', fontSize: '0.9rem' }}>
+                                                <Wrench size={14} /> {vehicle.kilometraje ? `${vehicle.kilometraje} km` : 'N/A'}
+                                            </span>
+                                            {proxKms && (
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ea580c', fontSize: '0.9rem', fontWeight: '600' }}>
+                                                    Próx: {proxKms} km
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))
+                                )
+                            })
                         )}
                     </div>
                 </div>
@@ -179,9 +245,12 @@ const ClientDetail = () => {
                                 <p className="text-sm text-gray-500 font-medium mb-1">
                                     Vehículo: {item.vehicle_model} ({item.vehicle_plate})
                                 </p>
-                                <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '4px' }}>
-                                    <Calendar size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
-                                    {new Date(item.created_at).toLocaleDateString()} • {item.kilometraje} km
+                                <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                    <span><Calendar size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} />{new Date(item.created_at).toLocaleDateString()}</span>
+                                    <span className="font-medium text-gray-500">• {item.kilometraje} km</span>
+                                    {item.prox_kilometraje && (
+                                        <span className="font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded text-xs ml-2">Próx: {item.prox_kilometraje} km</span>
+                                    )}
                                 </p>
                             </div>
                             <div style={{ textAlign: 'right' }}>
@@ -202,8 +271,8 @@ const ClientDetail = () => {
 
             {/* Modal de Edición */}
             {isEditing && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
-                    <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm m-4 relative">
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                    <div className="bg-white rounded-xl shadow-xl w-full p-6 overflow-y-auto" style={{ maxWidth: '500px', maxHeight: '90vh' }}>
                         <h2 className="text-xl font-bold mb-4 text-gray-800">Editar Cliente</h2>
                         <form className="space-y-4">
                             <div>
@@ -249,6 +318,88 @@ const ClientDetail = () => {
                                     className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium"
                                 >
                                     Guardar Cambios
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Editar Vehículo */}
+            {isEditingVehicle && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                    <div className="bg-white rounded-xl shadow-xl w-full p-6 overflow-y-auto" style={{ maxWidth: '500px', maxHeight: '90vh' }}>
+                        <h2 className="text-xl font-bold mb-4 text-gray-800">Editar Vehículo</h2>
+                        <form className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                                        value={vehicleForm.brand}
+                                        onChange={e => setVehicleForm({ ...vehicleForm, brand: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                                        value={vehicleForm.model}
+                                        onChange={e => setVehicleForm({ ...vehicleForm, model: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Año</label>
+                                    <input
+                                        type="number"
+                                        className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                                        value={vehicleForm.year}
+                                        onChange={e => setVehicleForm({ ...vehicleForm, year: e.target.value })}
+                                    />
+                                </div>
+                                <div className="col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Placa *</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-orange-500 outline-none uppercase"
+                                        value={vehicleForm.plate}
+                                        onChange={e => setVehicleForm({ ...vehicleForm, plate: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Kilometraje Actual</label>
+                                <input
+                                    type="number"
+                                    className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                                    value={vehicleForm.kilometraje}
+                                    onChange={e => setVehicleForm({ ...vehicleForm, kilometraje: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditingVehicle(false)}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleSaveVehicle}
+                                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium"
+                                >
+                                    Guardar Auto
                                 </button>
                             </div>
                         </form>

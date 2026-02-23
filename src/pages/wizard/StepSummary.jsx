@@ -17,8 +17,8 @@ const StepSummary = ({ onPrev, formData }) => {
         // Preparar Payload para el Backend
         const payload = {
             vehicle_id: formData.vehicle.id,
-            kilometraje: parseInt(formData.vehicle.kilometraje) || 0, // El actual antes del servicio
-            prox_kilometraje: parseInt(formData.service.kilometraje), // El nuevo ingresado
+            kilometraje: parseInt(formData.service.kilometraje) || 0, // El nuevo kilometraje ingresado
+            prox_kilometraje: parseInt(formData.service.kilometraje) ? parseInt(formData.service.kilometraje) + 10000 : null, // Sugerimos prox + 5000km
             fecha: new Date().toISOString().split('T')[0], // Hoy
             observaciones: formData.service.description,
             parts: (formData.service.parts || []).map(p => ({
@@ -31,8 +31,6 @@ const StepSummary = ({ onPrev, formData }) => {
                 cost_at_time: parseFloat(l.cost_at_time)
             }))
         };
-
-        console.log("Enviando Payload:", payload); // Debugging para el usuario
 
         try {
             await axios.post('/maintenances', payload);
@@ -67,7 +65,7 @@ const StepSummary = ({ onPrev, formData }) => {
                         <FileText size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} />
                         Observaciones
                     </h4>
-                    <p style={{ fontStyle: 'italic', color: '#555' }}>{formData.service.description || "Ninguna."}</p>
+                    <p style={{ fontStyle: 'italic', color: '#555', wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>{formData.service.description || "Ninguna."}</p>
                 </div>
 
                 {/* Totales Derecha */}
