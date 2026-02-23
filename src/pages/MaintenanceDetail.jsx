@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
-import { ArrowLeft, Car, User, Wrench, Package, FileText } from 'lucide-react';
+import { ArrowLeft, Car, User, Wrench, Package, FileText, Printer } from 'lucide-react';
 
 const MaintenanceDetail = () => {
     const { id } = useParams();
@@ -31,14 +31,14 @@ const MaintenanceDetail = () => {
     const client = vehicle?.client;
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
+        <div className="p-6 max-w-7xl mx-auto space-y-6 print:p-0 print:space-y-4 print:max-w-none print:w-full">
 
             {/* HEADER */}
-            <header className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <header className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 print:shadow-none print:border-none print:p-0 print:mb-8">
                 <div className="flex items-center gap-8">
                     <button
                         onClick={() => navigate(-1)}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors bg-gray-50 flex-shrink-0"
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors bg-gray-50 flex-shrink-0 no-print"
                     >
                         <ArrowLeft size={24} className="text-gray-600" />
                     </button>
@@ -57,21 +57,29 @@ const MaintenanceDetail = () => {
                     </div>
                 </div>
 
-                <div className="text-right">
-                    <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">
-                        Total Facturado
-                    </p>
-                    <p className="text-2xl font-black text-gray-800">
-                        ${parseFloat(total_cost || 0).toFixed(2)}
-                    </p>
+                <div className="text-right flex items-center gap-6">
+                    <button
+                        onClick={() => window.print()}
+                        className="no-print bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm"
+                    >
+                        <Printer size={18} /> Imprimir / PDF
+                    </button>
+                    <div>
+                        <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">
+                            Total Facturado
+                        </p>
+                        <p className="text-2xl font-black text-gray-800">
+                            ${parseFloat(total_cost || 0).toFixed(2)}
+                        </p>
+                    </div>
                 </div>
             </header>
 
             {/* CLIENTE + VEHICULO */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row overflow-hidden print:shadow-none print:border-2 print:border-gray-200">
 
                 {/* CLIENTE */}
-                <div className="flex-1 p-6 border-b md:border-b-0 md:border-r border-gray-100 flex gap-4 items-start">
+                <div className="flex-1 p-6 border-b md:border-b-0 md:border-r border-gray-100 print:border-r-2 print:border-gray-200 flex gap-4 items-start">
                     <User size={24} className="text-orange-600 flex-shrink-0" />
                     <div className="flex-1">
                         <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">
@@ -138,7 +146,7 @@ const MaintenanceDetail = () => {
             )}
 
             {/* REPUESTOS */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden print:shadow-none print:border-2 print:border-gray-200 print:page-break-inside-avoid">
                 <div className="bg-orange-50 px-3 py-4 border-b border-orange-100 flex justify-between items-center">
                     <h3 className="font-bold text-orange-900 flex items-center gap-2 text-lg">
                         <Package size={20} className="text-orange-600" />
@@ -169,7 +177,7 @@ const MaintenanceDetail = () => {
             </div>
 
             {/* MANO DE OBRA */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden print:shadow-none print:border-2 print:border-gray-200 print:page-break-inside-avoid">
                 <div className="bg-blue-50 px-3 py-2 border-b border-blue-100 flex justify-between items-center">
                     <h3 className="font-bold text-blue-900 flex items-center gap-2 text-lg">
                         <Wrench size={20} className="text-orange-600" />

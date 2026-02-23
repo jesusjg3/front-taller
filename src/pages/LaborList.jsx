@@ -56,7 +56,13 @@ const LaborList = () => {
             closeModal();
         } catch (error) {
             console.error("Error saving labor:", error);
-            alert("Error al guardar servicio.");
+            let msg = "Error al guardar servicio.";
+            if (error.response?.data?.errors) {
+                msg = Object.values(error.response.data.errors).flat().join('\n');
+            } else if (error.response?.data?.message) {
+                msg = error.response.data.message;
+            }
+            alert(msg);
         } finally {
             setCreateLoading(false);
         }
@@ -69,7 +75,13 @@ const LaborList = () => {
                 setLabors(labors.filter(l => l.id !== id));
             } catch (error) {
                 console.error("Error deleting labor:", error);
-                alert("Error al eliminar servicio.");
+                let msg = "Error al eliminar servicio.";
+                if (error.response?.data?.errors) {
+                    msg = Object.values(error.response.data.errors).flat().join('\n');
+                } else if (error.response?.data?.message) {
+                    msg = error.response.data.message;
+                }
+                alert(msg);
             }
         }
     };

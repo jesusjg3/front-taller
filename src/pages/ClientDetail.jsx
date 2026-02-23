@@ -27,6 +27,7 @@ const ClientDetail = () => {
     }, [id]);
 
     const [isEditing, setIsEditing] = useState(false);
+    const [isSavingClient, setIsSavingClient] = useState(false);
     const [editForm, setEditForm] = useState({
         name: '',
         phone: '',
@@ -44,6 +45,7 @@ const ClientDetail = () => {
 
     const handleSaveClient = async (e) => {
         e.preventDefault();
+        setIsSavingClient(true);
         try {
             await axios.put(`/clients/${id}`, editForm);
             setClient({ ...client, ...editForm });
@@ -51,12 +53,20 @@ const ClientDetail = () => {
             alert("Cliente actualizado correctamente.");
         } catch (error) {
             console.error("Error updating client:", error);
-            const msg = error.response?.data?.message || "Error al actualizar el cliente.";
+            let msg = "Error al actualizar el cliente.";
+            if (error.response?.data?.errors) {
+                msg = Object.values(error.response.data.errors).flat().join('\n');
+            } else if (error.response?.data?.message) {
+                msg = error.response.data.message;
+            }
             alert(msg);
+        } finally {
+            setIsSavingClient(false);
         }
     };
 
     const [isEditingVehicle, setIsEditingVehicle] = useState(false);
+    const [isSavingVehicle, setIsSavingVehicle] = useState(false);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [vehicleForm, setVehicleForm] = useState({
         brand: '',
@@ -84,6 +94,7 @@ const ClientDetail = () => {
 
     const handleSaveVehicle = async (e) => {
         e.preventDefault();
+        setIsSavingVehicle(true);
         try {
             await axios.put(`/vehicles/${selectedVehicle.id}`, { ...vehicleForm, client_id: client.id });
             const updatedVehicles = client.vehicles.map(v => v.id === selectedVehicle.id ? { ...v, ...vehicleForm } : v);
@@ -92,8 +103,15 @@ const ClientDetail = () => {
             alert("Vehículo actualizado correctamente.");
         } catch (error) {
             console.error("Error updating vehicle:", error);
-            const msg = error.response?.data?.message || "Error al actualizar el vehículo.";
+            let msg = "Error al actualizar el vehículo.";
+            if (error.response?.data?.errors) {
+                msg = Object.values(error.response.data.errors).flat().join('\n');
+            } else if (error.response?.data?.message) {
+                msg = error.response.data.message;
+            }
             alert(msg);
+        } finally {
+            setIsSavingVehicle(false);
         }
     };
 
@@ -105,7 +123,12 @@ const ClientDetail = () => {
             setClient({ ...client, vehicles: updatedClientVehicles });
         } catch (error) {
             console.error("Error deleting vehicle:", error);
-            const msg = error.response?.data?.message || "Error al eliminar el vehículo.";
+            let msg = "Error al eliminar el vehículo.";
+            if (error.response?.data?.errors) {
+                msg = Object.values(error.response.data.errors).flat().join('\n');
+            } else if (error.response?.data?.message) {
+                msg = error.response.data.message;
+            }
             alert(msg);
         }
     };
@@ -309,15 +332,17 @@ const ClientDetail = () => {
                                     type="button"
                                     onClick={() => setIsEditing(false)}
                                     className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                    disabled={isSavingClient}
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="button"
                                     onClick={handleSaveClient}
-                                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium"
+                                    disabled={isSavingClient}
+                                    className={`px-4 py-2 rounded-lg font-medium text-white ${isSavingClient ? 'bg-orange-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'}`}
                                 >
-                                    Guardar Cambios
+                                    {isSavingClient ? 'Guardando...' : 'Guardar Cambios'}
                                 </button>
                             </div>
                         </form>
@@ -391,15 +416,17 @@ const ClientDetail = () => {
                                     type="button"
                                     onClick={() => setIsEditingVehicle(false)}
                                     className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                    disabled={isSavingVehicle}
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="button"
                                     onClick={handleSaveVehicle}
-                                    className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium"
+                                    disabled={isSavingVehicle}
+                                    className={`px-4 py-2 rounded-lg font-medium text-white ${isSavingVehicle ? 'bg-orange-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'}`}
                                 >
-                                    Guardar Auto
+                                    {isSavingVehicle ? 'Guardando...' : 'Guardar Auto'}
                                 </button>
                             </div>
                         </form>

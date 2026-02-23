@@ -6,8 +6,8 @@ import { User, FileText, Check } from 'lucide-react';
 // --- PASO 4: RESUMEN Y CONFIRMACIÓN ---
 const StepSummary = ({ onPrev, formData }) => {
     // Calcular Totales
-    const totalParts = formData.service.parts.reduce((acc, p) => acc + (p.price_at_time * p.quantity), 0);
-    const totalLabor = formData.service.labor.reduce((acc, l) => acc + l.cost_at_time, 0);
+    const totalParts = (formData.service.parts || []).reduce((acc, p) => acc + (parseFloat(p.price_at_time || 0) * (p.quantity || 1)), 0);
+    const totalLabor = (formData.service.labor || []).reduce((acc, l) => acc + parseFloat(l.cost_at_time || 0), 0);
     const total = totalParts + totalLabor;
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -33,12 +33,18 @@ const StepSummary = ({ onPrev, formData }) => {
         };
 
         try {
-            await axios.post('/maintenances', payload);
+            const response = await axios.post('/maintenances', payload);
             alert("¡Mantenimiento registrado con éxito!");
-            navigate('/'); // O a la vista de detalles del mantenimiento creado si el back devuelve ID
+            navigate(`/maintenances/${response.data.data.id}`); // Redirigir al detalle fresco
         } catch (error) {
             console.error("Error guardando mantenimiento:", error);
-            alert("Error al guardar mantenimiento. Revise la consola.");
+            let msg = "Error al guardar mantenimiento. Revise la consola.";
+            if (error.response?.data?.errors) {
+                msg = Object.values(error.response.data.errors).flat().join('\n');
+            } else if (error.response?.data?.message) {
+                msg = error.response.data.message;
+            }
+            alert(msg);
         } finally {
             setLoading(false);
         }

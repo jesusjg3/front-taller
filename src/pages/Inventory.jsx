@@ -60,7 +60,13 @@ const Inventory = () => {
             closeModal();
         } catch (error) {
             console.error("Error saving part:", error);
-            alert("Error al guardar repuesto. Verifique los datos.");
+            let msg = "Error al guardar repuesto. Verifique los datos.";
+            if (error.response?.data?.errors) {
+                msg = Object.values(error.response.data.errors).flat().join('\n');
+            } else if (error.response?.data?.message) {
+                msg = error.response.data.message;
+            }
+            alert(msg);
         } finally {
             setCreateLoading(false);
         }
@@ -115,7 +121,13 @@ const Inventory = () => {
                 setParts(parts.filter(p => p.id !== id));
             } catch (error) {
                 console.error("Error deleting part:", error);
-                alert("Error al eliminar. Puede que tenga mantenimientos asociados.");
+                let msg = "Error al eliminar. Puede que tenga mantenimientos asociados.";
+                if (error.response?.data?.errors) {
+                    msg = Object.values(error.response.data.errors).flat().join('\n');
+                } else if (error.response?.data?.message) {
+                    msg = error.response.data.message;
+                }
+                alert(msg);
             }
         }
     };

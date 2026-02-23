@@ -70,7 +70,13 @@ const StepVehicle = ({ onNext, onPrev, formData, setFormData }) => {
             onNext();
         } catch (error) {
             console.error("Error creando vehículo:", error);
-            alert("Error al guardar vehículo.");
+            let msg = "Error al guardar vehículo.";
+            if (error.response?.data?.errors) {
+                msg = Object.values(error.response.data.errors).flat().join('\n');
+            } else if (error.response?.data?.message) {
+                msg = error.response.data.message;
+            }
+            alert(msg);
         } finally {
             setLoading(false);
         }

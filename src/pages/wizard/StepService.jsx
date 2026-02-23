@@ -110,6 +110,13 @@ const StepService = ({ onNext, onPrev, formData, setFormData }) => {
             return;
         }
 
+        // Validar que el kilometraje actual no sea menor al ultimo registrado
+        const vehicleOriginalKilometraje = formData.vehicle?.kilometraje || 0;
+        if (parseInt(kilometraje) < parseInt(vehicleOriginalKilometraje)) {
+            alert(`El kilometraje actual (${kilometraje} km) no puede ser menor al registrado en el vehículo (${vehicleOriginalKilometraje} km).`);
+            return;
+        }
+
         // Procesar servicios nuevos (que no tienen ID real de base de datos)
         const processedLabors = [];
         const laborsToCreate = labors.filter(l => l.is_new && !l.id);
@@ -132,7 +139,13 @@ const StepService = ({ onNext, onPrev, formData, setFormData }) => {
             }
         } catch (error) {
             console.error("Error creando servicios automáticos:", error);
-            alert("Error al guardar los servicios nuevos. Intente de nuevo.");
+            let msg = "Error al guardar los servicios nuevos. Intente de nuevo.";
+            if (error.response?.data?.errors) {
+                msg = Object.values(error.response.data.errors).flat().join('\n');
+            } else if (error.response?.data?.message) {
+                msg = error.response.data.message;
+            }
+            alert(msg);
             return; // Detener si falla
         }
 

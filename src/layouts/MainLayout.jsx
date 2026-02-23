@@ -15,12 +15,12 @@ const MainLayout = () => {
 
             {/* Overlay para cerrar sidebar en movil */}
             <div
-                className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`}
+                className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''} print:hidden`}
                 onClick={() => setIsSidebarOpen(false)}
             ></div>
 
             {/* Sidebar Lateral */}
-            <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+            <aside className={`sidebar ${isSidebarOpen ? 'open' : ''} print:hidden`}>
 
                 {/* Botón de Cierre (Solo en Móvil) */}
                 <button
@@ -102,7 +102,7 @@ const MainLayout = () => {
             <main className="main-content">
 
                 {/* Header Móvil (Solo visible en pantallas pequeñas) */}
-                <div className="mobile-header">
+                <div className="mobile-header print:hidden">
                     <h1>Taller <span>MG</span></h1>
                     <button onClick={toggleSidebar} className="hamburger-btn">
                         <Menu size={24} />
