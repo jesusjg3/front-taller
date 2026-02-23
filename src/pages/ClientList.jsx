@@ -60,7 +60,6 @@ const ClientList = () => {
                             <tr>
                                 <th className="p-4 border-b">Cliente</th>
                                 <th className="p-4 border-b">Contacto</th>
-                                <th className="p-4 border-b">Ubicación</th>
                                 <th className="p-4 border-b"></th>
                             </tr>
                         </thead>
@@ -89,14 +88,8 @@ const ClientList = () => {
                                                     <Phone size={14} className="text-gray-400" />
                                                     {client.phone || 'Sin teléfono'}
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <FileText size={14} className="text-gray-400" />
-                                                    {client.email || 'Sin email'}
-                                                </div>
+
                                             </div>
-                                        </td>
-                                        <td className="p-4 text-sm text-gray-600">
-                                            {client.address || 'Sin dirección'}
                                         </td>
                                         <td className="p-4 text-right">
                                             <ChevronRight className="text-gray-400" size={20} />

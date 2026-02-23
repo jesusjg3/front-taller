@@ -88,7 +88,7 @@ const Inventory = () => {
             brand: part.brand || '',
             current_price: part.current_price,
             stock: part.stock,
-            min_stock: part.min_stock || 5,
+            min_stock: part.min_stock ?? 5,
             manages_stock: part.manage_stock !== undefined ? part.manage_stock : true
         });
         setIsModalOpen(true);
@@ -168,7 +168,7 @@ const Inventory = () => {
                     <div>
                         <p className="text-gray-500 text-sm">Bajo Stock</p>
                         <p className="text-2xl font-bold text-red-600">
-                            {parts.filter(p => p.stock <= 5).length}
+                            {parts.filter(p => p.stock <= (p.min_stock ?? 5)).length}
                         </p>
                     </div>
                     <div className="bg-red-100 p-2 rounded-lg">
@@ -218,7 +218,7 @@ const Inventory = () => {
                                             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
                                                 Agotado
                                             </span>
-                                        ) : item.stock <= (item.min_stock || 5) ? (
+                                        ) : item.stock <= (item.min_stock ?? 5) ? (
                                             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">
                                                 Bajo Stock
                                             </span>
@@ -254,8 +254,8 @@ const Inventory = () => {
             {/* Modal Crear/Editar Repuesto */}
             {
                 isModalOpen && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md m-4">
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                        <div className="bg-white rounded-xl shadow-xl w-full p-6 overflow-y-auto" style={{ maxWidth: '500px', maxHeight: '90vh' }}>
                             <h2 className="text-xl font-bold mb-4 text-gray-800">
                                 {editingPart ? 'Editar Repuesto' : 'Nuevo Repuesto'}
                             </h2>

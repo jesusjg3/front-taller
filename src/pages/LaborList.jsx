@@ -178,10 +178,9 @@ const LaborList = () => {
                 </table>
             </div>
 
-            {/* Modal Crear/Editar Servicio */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md m-4">
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                    <div className="bg-white rounded-xl shadow-xl p-6 overflow-y-auto" style={{ width: '100%', maxWidth: '500px', maxHeight: '90vh' }}>
                         <h2 className="text-xl font-bold mb-4 text-gray-800">
                             {editingLabor ? 'Editar Servicio' : 'Nuevo Servicio'}
                         </h2>
@@ -210,7 +209,7 @@ const LaborList = () => {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Precio Estándar *</label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-2 text-gray-500">$</span>
+                                    <span className="absolute left-3 top-2 text-gray-500"></span>
                                     <input
                                         required
                                         type="number"

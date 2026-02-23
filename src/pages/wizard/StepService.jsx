@@ -81,7 +81,7 @@ const StepService = ({ onNext, onPrev, formData, setFormData }) => {
         const newRow = {
             temp_id: Date.now(),
             name: '',
-            price: 0,
+            price: '',
             is_new: true
         };
         setLabors([...labors, newRow]);
@@ -89,7 +89,7 @@ const StepService = ({ onNext, onPrev, formData, setFormData }) => {
 
     const updateLaborRow = (index, field, value) => {
         const newLabors = [...labors];
-        newLabors[index][field] = field === 'price' ? parseFloat(value) || 0 : value;
+        newLabors[index][field] = value;
         setLabors(newLabors);
     };
 
@@ -138,7 +138,7 @@ const StepService = ({ onNext, onPrev, formData, setFormData }) => {
 
         // Combinar existentes con los recién creados
         const finalLabors = [
-            ...existingLabors.map(l => ({ ...l, cost_at_time: l.price })),
+            ...existingLabors.map(l => ({ ...l, cost_at_time: parseFloat(l.price) || 0 })),
             ...processedLabors
         ];
 
@@ -147,7 +147,7 @@ const StepService = ({ onNext, onPrev, formData, setFormData }) => {
             service: {
                 description,
                 kilometraje,
-                parts: parts.map(p => ({ ...p, price_at_time: p.price })),
+                parts: parts.map(p => ({ ...p, price_at_time: parseFloat(p.price) || 0 })),
                 labor: finalLabors
             }
         });
@@ -370,6 +370,7 @@ const StepService = ({ onNext, onPrev, formData, setFormData }) => {
                                                 value={l.price}
                                                 min="0"
                                                 step="0.01"
+                                                placeholder="0.00"
                                                 onChange={(e) => updateLaborRow(index, 'price', e.target.value)}
                                                 style={{ width: '80px', padding: '6px', textAlign: 'right', border: '1px solid #e2e8f0', borderRadius: '4px', fontWeight: 'bold' }}
                                             />
@@ -393,7 +394,7 @@ const StepService = ({ onNext, onPrev, formData, setFormData }) => {
 
                     {labors.length > 0 && (
                         <div style={{ marginTop: '1rem', textAlign: 'right', fontSize: '0.9rem', color: '#64748b' }}>
-                            Subtotal Mano de Obra: <span style={{ fontWeight: 'bold', color: '#0369a1' }}>${labors.reduce((acc, l) => acc + (l.price || 0), 0).toFixed(2)}</span>
+                            Subtotal Mano de Obra: <span style={{ fontWeight: 'bold', color: '#0369a1' }}>${labors.reduce((acc, l) => acc + (parseFloat(l.price) || 0), 0).toFixed(2)}</span>
                         </div>
                     )}
                 </div>

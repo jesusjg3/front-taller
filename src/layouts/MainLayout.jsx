@@ -1,19 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { Home, Users, Wrench, FileText, PlusCircle } from 'lucide-react';
+import { Home, Users, Wrench, FileText, PlusCircle, Menu, X } from 'lucide-react';
 import '../styles/Layout.css';
 
 const MainLayout = () => {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
     return (
         <div className="dashboard-layout">
+
+            {/* Overlay para cerrar sidebar en movil */}
+            <div
+                className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`}
+                onClick={() => setIsSidebarOpen(false)}
+            ></div>
+
             {/* Sidebar Lateral */}
-            <aside className="sidebar">
+            <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+
+                {/* Botón de Cierre (Solo en Móvil) */}
+                <button
+                    onClick={toggleSidebar}
+                    className="mobile-close-btn"
+                >
+                    <X size={24} />
+                </button>
+
                 <div className="sidebar-header">
                     <h2>Taller MG 🔧</h2>
                 </div>
 
                 {/* Botón de Acción Principal */}
-                <NavLink to="/new-maintenance" className="new-maintenance-btn">
+                <NavLink
+                    to="/new-maintenance"
+                    className="new-maintenance-btn"
+                    onClick={() => setIsSidebarOpen(false)}
+                >
                     <PlusCircle size={20} />
                     Nuevo Servicio
                 </NavLink>
@@ -24,6 +50,7 @@ const MainLayout = () => {
                         to="/"
                         className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
                         end
+                        onClick={() => setIsSidebarOpen(false)}
                     >
                         <Home size={20} />
                         Inicio
@@ -32,16 +59,16 @@ const MainLayout = () => {
                     <NavLink
                         to="/clients"
                         className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
+                        onClick={() => setIsSidebarOpen(false)}
                     >
                         <Users size={20} />
                         Clientes
                     </NavLink>
 
-
-
                     <NavLink
                         to="/maintenances"
                         className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
+                        onClick={() => setIsSidebarOpen(false)}
                     >
                         <FileText size={20} />
                         Historial
@@ -50,6 +77,7 @@ const MainLayout = () => {
                     <NavLink
                         to="/inventory"
                         className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
+                        onClick={() => setIsSidebarOpen(false)}
                     >
                         <Wrench size={20} />
                         Inventario
@@ -58,8 +86,9 @@ const MainLayout = () => {
                     <NavLink
                         to="/labors"
                         className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
+                        onClick={() => setIsSidebarOpen(false)}
                     >
-                        <Wrench size={20} /> {/* Reusing Wrench for now, could be Hammer */}
+                        <Wrench size={20} />
                         Servicios
                     </NavLink>
                 </nav>
@@ -71,7 +100,18 @@ const MainLayout = () => {
 
             {/* Contenido Dinámico de la Página */}
             <main className="main-content">
-                <Outlet />
+
+                {/* Header Móvil (Solo visible en pantallas pequeñas) */}
+                <div className="mobile-header">
+                    <h1>Taller <span>MG</span></h1>
+                    <button onClick={toggleSidebar} className="hamburger-btn">
+                        <Menu size={24} />
+                    </button>
+                </div>
+
+                <div className="main-content-inner">
+                    <Outlet />
+                </div>
             </main>
         </div>
     );
