@@ -94,8 +94,15 @@ const StepService = ({ onNext, onPrev, formData, setFormData }) => {
     };
 
     const updatePartQuantity = (id, quantity) => {
-        if (quantity < 1) return;
-        setParts(parts.map(p => p.id === id ? { ...p, quantity: parseInt(quantity) } : p));
+        // Permitir que se vacíe temporalmente para borrar
+        if (quantity === '') {
+            setParts(parts.map(p => p.id === id ? { ...p, quantity: '' } : p));
+            return;
+        }
+
+        const val = parseInt(quantity);
+        if (val < 1) return;
+        setParts(parts.map(p => p.id === id ? { ...p, quantity: val } : p));
     };
 
     const updatePartPrice = (id, price) => {
@@ -110,10 +117,16 @@ const StepService = ({ onNext, onPrev, formData, setFormData }) => {
             return;
         }
 
-        // Validar que el kilometraje actual no sea menor al ultimo registrado
+        // Validar que el kilometraje actual no sea menor al ultimo registrado y sea un número válido
+        const kmIngresado = parseInt(kilometraje);
+        if (isNaN(kmIngresado)) {
+            alert("Por favor, ingrese un kilometraje válido y no deje el campo vacío.");
+            return;
+        }
+
         const vehicleOriginalKilometraje = formData.vehicle?.kilometraje || 0;
-        if (parseInt(kilometraje) < parseInt(vehicleOriginalKilometraje)) {
-            alert(`El kilometraje actual (${kilometraje} km) no puede ser menor al registrado en el vehículo (${vehicleOriginalKilometraje} km).`);
+        if (kmIngresado < parseInt(vehicleOriginalKilometraje)) {
+            alert(`El kilometraje actual (${kmIngresado} km) no puede ser menor al registrado en el vehículo (${vehicleOriginalKilometraje} km).`);
             return;
         }
 

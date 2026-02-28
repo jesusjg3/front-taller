@@ -266,7 +266,12 @@ const Inventory = () => {
             {/* Modal Crear/Editar Repuesto */}
             {
                 isModalOpen && (
-                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                    <div
+                        style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+                        onClick={(e) => {
+                            if (e.target === e.currentTarget) closeModal();
+                        }}
+                    >
                         <div className="bg-white rounded-xl shadow-xl w-full p-6 overflow-y-auto" style={{ maxWidth: '500px', maxHeight: '90vh' }}>
                             <h2 className="text-xl font-bold mb-4 text-gray-800">
                                 {editingPart ? 'Editar Repuesto' : 'Nuevo Repuesto'}
@@ -308,6 +313,7 @@ const Inventory = () => {
                                             required
                                             type="number"
                                             step="0.01"
+                                            min="0"
                                             className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-orange-500 outline-none"
                                             value={newItem.current_price}
                                             onChange={e => setNewItem({ ...newItem, current_price: e.target.value })}
@@ -319,6 +325,7 @@ const Inventory = () => {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Stock Inicial</label>
                                         <input
                                             type="number"
+                                            min="0"
                                             className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-orange-500 outline-none"
                                             value={newItem.stock}
                                             onChange={e => setNewItem({ ...newItem, stock: e.target.value })}
@@ -328,6 +335,7 @@ const Inventory = () => {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Stock Mínimo</label>
                                         <input
                                             type="number"
+                                            min="0"
                                             className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-orange-500 outline-none"
                                             value={newItem.min_stock}
                                             onChange={e => setNewItem({ ...newItem, min_stock: e.target.value })}

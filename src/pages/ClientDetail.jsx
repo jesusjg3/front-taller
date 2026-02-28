@@ -292,9 +292,13 @@ const ClientDetail = () => {
                 )}
             </div>
 
-            {/* Modal de Edición */}
             {isEditing && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                <div
+                    style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) setIsEditing(false);
+                    }}
+                >
                     <div className="bg-white rounded-xl shadow-xl w-full p-6 overflow-y-auto" style={{ maxWidth: '500px', maxHeight: '90vh' }}>
                         <h2 className="text-xl font-bold mb-4 text-gray-800">Editar Cliente</h2>
                         <form className="space-y-4">
@@ -350,9 +354,13 @@ const ClientDetail = () => {
                 </div>
             )}
 
-            {/* Modal Editar Vehículo */}
             {isEditingVehicle && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                <div
+                    style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) setIsEditingVehicle(false);
+                    }}
+                >
                     <div className="bg-white rounded-xl shadow-xl w-full p-6 overflow-y-auto" style={{ maxWidth: '500px', maxHeight: '90vh' }}>
                         <h2 className="text-xl font-bold mb-4 text-gray-800">Editar Vehículo</h2>
                         <form className="space-y-4">
@@ -426,7 +434,7 @@ const ClientDetail = () => {
                                     disabled={isSavingVehicle}
                                     className={`px-4 py-2 rounded-lg font-medium text-white ${isSavingVehicle ? 'bg-orange-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'}`}
                                 >
-                                    {isSavingVehicle ? 'Guardando...' : 'Guardar Auto'}
+                                    {isSavingVehicle ? 'Guardando...' : 'Guardar Vehículo'}
                                 </button>
                             </div>
                         </form>

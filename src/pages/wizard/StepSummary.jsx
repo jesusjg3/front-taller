@@ -18,7 +18,7 @@ const StepSummary = ({ onPrev, formData }) => {
         const payload = {
             vehicle_id: formData.vehicle.id,
             kilometraje: parseInt(formData.service.kilometraje) || 0, // El nuevo kilometraje ingresado
-            prox_kilometraje: parseInt(formData.service.kilometraje) ? parseInt(formData.service.kilometraje) + 10000 : null, // Sugerimos prox + 5000km
+            prox_kilometraje: parseInt(formData.service.kilometraje) ? parseInt(formData.service.kilometraje) + 5000 : null, // Sugerimos prox + 5000km
             fecha: new Date().toISOString().split('T')[0], // Hoy
             observaciones: formData.service.description,
             parts: (formData.service.parts || []).map(p => ({
