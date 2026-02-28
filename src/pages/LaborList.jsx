@@ -191,7 +191,12 @@ const LaborList = () => {
             </div>
 
             {isModalOpen && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+                <div
+                    style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) closeModal();
+                    }}
+                >
                     <div className="bg-white rounded-xl shadow-xl p-6 overflow-y-auto" style={{ width: '100%', maxWidth: '500px', maxHeight: '90vh' }}>
                         <h2 className="text-xl font-bold mb-4 text-gray-800">
                             {editingLabor ? 'Editar Servicio' : 'Nuevo Servicio'}
@@ -226,6 +231,7 @@ const LaborList = () => {
                                         required
                                         type="number"
                                         step="0.01"
+                                        min="0"
                                         className="w-full border rounded-lg pl-8 p-2 focus:ring-2 focus:ring-orange-500 outline-none"
                                         value={newLabor.standard_price}
                                         onChange={e => setNewLabor({ ...newLabor, standard_price: e.target.value })}

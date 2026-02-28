@@ -129,8 +129,6 @@ const MaintenanceDetail = () => {
                     </div>
                 </div>
             </div>
-
-            {/* OBSERVACIONES */}
             {observaciones && (
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex gap-4 items-start">
                     <FileText size={24} className="text-orange-600 flex-shrink-0" />
@@ -157,20 +155,34 @@ const MaintenanceDetail = () => {
 
                 <div className="p-6 overflow-x-auto">
                     <table className="w-full text-sm">
+                        <thead className="bg-gray-50 border-y border-gray-100 mb-2">
+                            <tr>
+                                <th className="text-left py-2 px-4 text-gray-500 font-medium">Descripción</th>
+                                <th className="text-center py-2 px-4 text-gray-500 font-medium">Cant.</th>
+                                <th className="text-right py-2 px-4 text-gray-500 font-medium">P. Unit</th>
+                                <th className="text-right py-2 px-4 text-gray-500 font-medium">Subtotal</th>
+                            </tr>
+                        </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {parts.map(part => (
-                                <tr key={part.id}>
-                                    <td className="py-4">
-                                        <p className="font-bold text-gray-800">{part.name}</p>
-                                        <p className="text-xs text-gray-400">SKU: {part.code}</p>
-                                    </td>
-                                    <td className="text-center">${part.pivot.quantity}</td>
-                                    <td className="text-right">${part.pivot.price_at_time}</td>
-                                    <td className="text-right font-bold">
-                                        ${(part.pivot.quantity * part.pivot.price_at_time).toFixed(2)}
-                                    </td>
+                            {parts && parts.length > 0 ? (
+                                parts.map(part => (
+                                    <tr key={part.id}>
+                                        <td className="py-4 px-4 w-1/2">
+                                            <p className="font-bold text-gray-800">{part.name}</p>
+                                            <p className="text-xs text-gray-400">SKU: {part.code}</p>
+                                        </td>
+                                        <td className="text-center py-4 px-4 w-1/6">{part.pivot.quantity}</td>
+                                        <td className="text-right py-4 px-4 w-1/6">${parseFloat(part.pivot.price_at_time).toFixed(2)}</td>
+                                        <td className="text-right font-bold py-4 px-4 w-1/6">
+                                            ${(part.pivot.quantity * parseFloat(part.pivot.price_at_time)).toFixed(2)}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="4" className="text-center py-6 text-gray-400 italic">No se agregaron repuestos a este servicio</td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -188,22 +200,34 @@ const MaintenanceDetail = () => {
 
                 <div className="p-6">
                     <table className="w-full text-sm">
+                        <thead className="bg-gray-50 border-y border-gray-100 mb-2">
+                            <tr>
+                                <th className="text-left py-2 px-4 text-gray-500 font-medium">Descripción del Trabajo</th>
+                                <th className="text-right py-2 px-4 text-gray-500 font-medium">Costo</th>
+                            </tr>
+                        </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {labors.map(labor => (
-                                <tr key={labor.id} className="hover:bg-gray-50/50 transition">
-                                    <td className="py-5 pr-4 align-top">
-                                        <p className="font-semibold text-gray-800">{labor.name}</p>
-                                        {labor.description && (
-                                            <p className="text-sm text-gray-400 mt-1">
-                                                {labor.description}
-                                            </p>
-                                        )}
-                                    </td>
-                                    <td className="py-5 pl-4 text-right font-bold text-gray-800 align-top">
-                                        ${parseFloat(labor.pivot.cost_at_time).toFixed(2)}
-                                    </td>
+                            {labors && labors.length > 0 ? (
+                                labors.map(labor => (
+                                    <tr key={labor.id} className="hover:bg-gray-50/50 transition">
+                                        <td className="py-5 px-4 w-3/4 align-top">
+                                            <p className="font-semibold text-gray-800">{labor.name}</p>
+                                            {labor.description && (
+                                                <p className="text-sm text-gray-400 mt-1">
+                                                    {labor.description}
+                                                </p>
+                                            )}
+                                        </td>
+                                        <td className="py-5 px-4 w-1/4 text-right font-bold text-gray-800 align-top">
+                                            ${parseFloat(labor.pivot.cost_at_time).toFixed(2)}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="2" className="text-center py-6 text-gray-400 italic">No se agregó mano de obra a este servicio</td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>

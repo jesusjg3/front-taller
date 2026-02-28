@@ -50,7 +50,9 @@ const StepVehicle = ({ onNext, onPrev, formData, setFormData }) => {
     };
 
     const handleAddVehicle = async () => {
-        if (!newVehicle.brand || !newVehicle.plate) return alert("Marca y Placa obligatorias");
+        if (!newVehicle.brand || !newVehicle.plate || !newVehicle.year) {
+            return alert("Marca, Año y Placa son obligatorios");
+        }
 
         setLoading(true);
         try {
