@@ -16,7 +16,13 @@
     padding: 1rem;
     transition: transform 0.3s ease;
     z-index: 50;
+    overflow-y: auto;
     /* Por si se monta encima del contenido */
+}
+
+/* Base states para elementos móviles (ocultos por defecto en PC) */
+.print-only {
+    display: none;
 }
 
 /* Base states para elementos móviles (ocultos por defecto en PC) */
@@ -109,6 +115,36 @@
     flex: 1;
     padding: 2rem;
     overflow-y: auto;
+}
+
+/* ==== GRID HORIZONTAL DE VEHÍCULOS ==== */
+.vehicles-grid-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    /* Estilizar scrollbar para webkit */
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+.vehicles-grid-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.vehicles-grid-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.vehicles-grid-scroll::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+}
+
+.client-vehicle-card {
+    min-width: 280px;
+    /* Fuerza el ancho de las tarjetas */
+    flex: 0 0 auto;
 }
 
 /* ==== DISEÑO RESPONSIVO (MÓVILES Y PANTALLAS CHICAS) ==== */
@@ -212,6 +248,11 @@
 
     .no-print {
         display: none !important;
+    }
+
+    .print-only {
+        display: inline-block !important;
+        /* o block/inline según necesidad */
     }
 
     body,

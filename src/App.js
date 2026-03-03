@@ -9,6 +9,7 @@ import Inventory from './pages/Inventory';
 import NewMaintenanceWizard from './pages/NewMaintenanceWizard';
 import LaborList from './pages/LaborList';
 import MaintenanceDetail from './pages/MaintenanceDetail';
+import WorkOrderPrint from './pages/WorkOrderPrint';
 
 function App() {
     return (
@@ -20,9 +21,9 @@ function App() {
                     <Route index element={<Dashboard />} />
                     <Route path="clients" element={<ClientList />} />
                     <Route path="clients/:id" element={<ClientDetail />} />
-                    <Route path="vehicles" element={<h2>Gestión de Vehículos</h2>} />
                     <Route path="maintenances" element={<MaintenanceHistory />} />
                     <Route path="maintenances/:id" element={<MaintenanceDetail />} />
+                    <Route path="work-order" element={<WorkOrderPrint />} />
                     <Route path="inventory" element={<Inventory />} />
                     <Route path="labors" element={<LaborList />} />
                     <Route path="new-maintenance" element={<NewMaintenanceWizard />} />

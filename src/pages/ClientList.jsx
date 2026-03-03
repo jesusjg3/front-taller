@@ -10,6 +10,11 @@ const ClientList = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Estados para crear cliente
+    const [isCreatingClient, setIsCreatingClient] = useState(false);
+    const [isSavingClient, setIsSavingClient] = useState(false);
+    const [clientForm, setClientForm] = useState({ name: '', phone: '', ci: '' });
+
     useEffect(() => {
         const fetchClients = async () => {
             try {
@@ -29,6 +34,29 @@ const ClientList = () => {
         navigate(`/clients/${clientId}`);
     };
 
+    const handleCreateClient = async (e) => {
+        e.preventDefault();
+        setIsSavingClient(true);
+        try {
+            const response = await axios.post('/clients', clientForm);
+            const newClient = response.data.data || response.data;
+            setClients([newClient, ...clients]);
+            setIsCreatingClient(false);
+            setClientForm({ name: '', phone: '', ci: '' });
+        } catch (error) {
+            console.error("Error creating client:", error);
+            let msg = "Error al crear el cliente.";
+            if (error.response?.data?.errors) {
+                msg = Object.values(error.response.data.errors).flat().join('\n');
+            } else if (error.response?.data?.message) {
+                msg = error.response.data.message;
+            }
+            alert(msg);
+        } finally {
+            setIsSavingClient(false);
+        }
+    };
+
     const filteredClients = clients.filter(client =>
         client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.ci?.includes(searchTerm) ||
@@ -38,7 +66,18 @@ const ClientList = () => {
     return (
         <div className="p-6">
             <header className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">Clientes</h1>
+                <div className="flex items-center gap-4">
+                    <h1 className="text-2xl font-bold text-gray-800">Clientes</h1>
+                    <button
+                        onClick={() => {
+                            setClientForm({ name: '', phone: '', ci: '' });
+                            setIsCreatingClient(true);
+                        }}
+                        className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm flex items-center gap-2"
+                    >
+                        + Nuevo Cliente
+                    </button>
+                </div>
                 <div className="relative">
                     <Search className="absolute left-3 top-3 text-gray-400" size={20} />
                     <input
@@ -107,6 +146,68 @@ const ClientList = () => {
                     </table>
                 )}
             </div>
+
+            {/* MODAL CREAR CLIENTE */}
+            {isCreatingClient && (
+                <div
+                    style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) setIsCreatingClient(false);
+                    }}
+                >
+                    <div className="bg-white rounded-xl shadow-xl w-full p-6 overflow-y-auto" style={{ maxWidth: '500px', maxHeight: '90vh' }}>
+                        <h2 className="text-xl font-bold mb-4 text-gray-800">Nuevo Cliente</h2>
+                        <form className="space-y-4" onSubmit={handleCreateClient}>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo *</label>
+                                <input
+                                    required
+                                    type="text"
+                                    className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                                    value={clientForm.name}
+                                    onChange={e => setClientForm({ ...clientForm, name: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                                <input
+                                    type="text"
+                                    className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                                    value={clientForm.phone}
+                                    onChange={e => setClientForm({ ...clientForm, phone: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Cédula (CI)</label>
+                                <input
+                                    type="text"
+                                    className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                                    value={clientForm.ci}
+                                    onChange={e => setClientForm({ ...clientForm, ci: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCreatingClient(false)}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                    disabled={isSavingClient}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isSavingClient}
+                                    className={`px-4 py-2 rounded-lg font-medium text-white ${isSavingClient ? 'bg-orange-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'}`}
+                                >
+                                    {isSavingClient ? 'Guardando...' : 'Crear Cliente'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
