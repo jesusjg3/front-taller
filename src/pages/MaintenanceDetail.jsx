@@ -48,7 +48,8 @@ const MaintenanceDetail = () => {
                             <span className="bg-orange-100 p-2 rounded-lg">
                                 <FileText className="text-orange-600" size={24} />
                             </span>
-                            Servicio #{id}
+                            <span className="no-print">Servicio #{id}</span>
+                            <span className="print-only">Reporte de Servicio</span>
                         </h1>
 
                         <p className="text-gray-500 text-sm mt-1">
@@ -59,7 +60,12 @@ const MaintenanceDetail = () => {
 
                 <div className="text-right flex items-center gap-6">
                     <button
-                        onClick={() => window.print()}
+                        onClick={() => {
+                            const originalTitle = document.title;
+                            document.title = client?.name ? `Comprobante_${client.name.replace(/\s+/g, '_')}` : 'Comprobante_Servicio';
+                            window.print();
+                            setTimeout(() => { document.title = originalTitle; }, 1000);
+                        }}
                         className="no-print bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm"
                     >
                         <Printer size={18} /> Imprimir / PDF

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { User, Phone, UserCheck, Car, Calendar, Wrench, ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { User, Phone, UserCheck, Car, Calendar, Wrench, ArrowLeft, Edit, Trash2, FileText } from 'lucide-react';
 import axios from '../api/axios';
 
 const ClientDetail = () => {
@@ -92,15 +92,34 @@ const ClientDetail = () => {
         setIsEditingVehicle(true);
     };
 
+    const handleCreateVehicleClick = () => {
+        setSelectedVehicle(null);
+        setVehicleForm({
+            brand: '',
+            model: '',
+            year: '',
+            plate: '',
+            kilometraje: ''
+        });
+        setIsEditingVehicle(true);
+    };
+
     const handleSaveVehicle = async (e) => {
         e.preventDefault();
         setIsSavingVehicle(true);
         try {
-            await axios.put(`/vehicles/${selectedVehicle.id}`, { ...vehicleForm, client_id: client.id });
-            const updatedVehicles = client.vehicles.map(v => v.id === selectedVehicle.id ? { ...v, ...vehicleForm } : v);
-            setClient({ ...client, vehicles: updatedVehicles });
+            if (selectedVehicle) {
+                await axios.put(`/vehicles/${selectedVehicle.id}`, { ...vehicleForm, client_id: client.id });
+                const updatedVehicles = client.vehicles.map(v => v.id === selectedVehicle.id ? { ...v, ...vehicleForm } : v);
+                setClient({ ...client, vehicles: updatedVehicles });
+                alert("Vehículo actualizado correctamente.");
+            } else {
+                const response = await axios.post(`/vehicles`, { ...vehicleForm, client_id: client.id });
+                const newVehicle = response.data.data || response.data;
+                setClient({ ...client, vehicles: [...(client.vehicles || []), newVehicle] });
+                alert("Vehículo agregado correctamente.");
+            }
             setIsEditingVehicle(false);
-            alert("Vehículo actualizado correctamente.");
         } catch (error) {
             console.error("Error updating vehicle:", error);
             let msg = "Error al actualizar el vehículo.";
@@ -131,6 +150,10 @@ const ClientDetail = () => {
             }
             alert(msg);
         }
+    };
+
+    const handlePrintOrder = (vehicle) => {
+        navigate('/work-order', { state: { client, vehicle } });
     };
 
     const allMaintenances = client.vehicles ? client.vehicles.flatMap(v =>
@@ -207,12 +230,17 @@ const ClientDetail = () => {
                             <Car size={20} className="text-orange-600" />
                             Vehículos ({vehicles.length})
                         </h2>
-                        {/* TODO: Add button to add vehicle */}
+                        <button
+                            onClick={handleCreateVehicleClick}
+                            className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded-lg font-medium transition-colors text-sm shadow-sm"
+                        >
+                            + Agregar
+                        </button>
                     </div>
 
-                    <div className="flex flex-col gap-4">
+                    <div className="vehicles-grid-scroll">
                         {vehicles.length === 0 ? (
-                            <p className="text-gray-500 italic">No hay vehículos registrados.</p>
+                            <p className="text-gray-500 italic w-full">No hay vehículos registrados.</p>
                         ) : (
                             vehicles.map(vehicle => {
                                 const latestMaintenance = allMaintenances.find(m => m.vehicle_id === vehicle.id);
@@ -228,6 +256,14 @@ const ClientDetail = () => {
                                                 <Trash2 size={16} />
                                             </button>
                                         </h3>
+                                        <div className="mt-2 mb-3">
+                                            <button
+                                                onClick={() => handlePrintOrder(vehicle)}
+                                                className="text-white bg-slate-700 hover:bg-slate-800 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                                            >
+                                                <FileText size={14} /> Crear Orden de Trabajo
+                                            </button>
+                                        </div>
                                         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
                                             <span className="bg-slate-200 text-slate-700 px-2 py-1 rounded text-sm font-bold">
                                                 {vehicle.plate}
@@ -362,8 +398,8 @@ const ClientDetail = () => {
                     }}
                 >
                     <div className="bg-white rounded-xl shadow-xl w-full p-6 overflow-y-auto" style={{ maxWidth: '500px', maxHeight: '90vh' }}>
-                        <h2 className="text-xl font-bold mb-4 text-gray-800">Editar Vehículo</h2>
-                        <form className="space-y-4">
+                        <h2 className="text-xl font-bold mb-4 text-gray-800">{selectedVehicle ? 'Editar Vehículo' : 'Nuevo Vehículo'}</h2>
+                        <form className="space-y-4" onSubmit={handleSaveVehicle}>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
@@ -429,8 +465,7 @@ const ClientDetail = () => {
                                     Cancelar
                                 </button>
                                 <button
-                                    type="button"
-                                    onClick={handleSaveVehicle}
+                                    type="submit"
                                     disabled={isSavingVehicle}
                                     className={`px-4 py-2 rounded-lg font-medium text-white ${isSavingVehicle ? 'bg-orange-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'}`}
                                 >
