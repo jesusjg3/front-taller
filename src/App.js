@@ -10,6 +10,7 @@ import NewMaintenanceWizard from './pages/NewMaintenanceWizard';
 import LaborList from './pages/LaborList';
 import MaintenanceDetail from './pages/MaintenanceDetail';
 import WorkOrderPrint from './pages/WorkOrderPrint';
+import Reports from './pages/Reports';
 
 function App() {
     return (
@@ -27,6 +28,7 @@ function App() {
                     <Route path="inventory" element={<Inventory />} />
                     <Route path="labors" element={<LaborList />} />
                     <Route path="new-maintenance" element={<NewMaintenanceWizard />} />
+                    <Route path="reports" element={<Reports />} />
                 </Route>
             </Routes>
         </Router>
