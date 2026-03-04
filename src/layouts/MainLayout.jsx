@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { Home, Users, Wrench, FileText, PlusCircle, Menu, X } from 'lucide-react';
+import { Home, Users, Wrench, FileText, PlusCircle, Menu, X, BarChart3 } from 'lucide-react';
 import '../styles/Layout.css';
 
 const MainLayout = () => {
@@ -90,6 +90,15 @@ const MainLayout = () => {
                     >
                         <Wrench size={20} />
                         Servicios
+                    </NavLink>
+
+                    <NavLink
+                        to="/reports"
+                        className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
+                        onClick={() => setIsSidebarOpen(false)}
+                    >
+                        <BarChart3 size={20} />
+                        Reportes
                     </NavLink>
                 </nav>
 
