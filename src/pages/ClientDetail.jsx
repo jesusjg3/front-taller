@@ -243,8 +243,8 @@ const ClientDetail = () => {
                             <p className="text-gray-500 italic w-full">No hay vehículos registrados.</p>
                         ) : (
                             vehicles.map(vehicle => {
-                                const latestMaintenance = allMaintenances.find(m => m.vehicle_id === vehicle.id);
-                                const proxKms = latestMaintenance?.prox_kilometraje;
+                                const latestMaintenanceWithOilChange = allMaintenances.find(m => m.vehicle_id === vehicle.id && m.prox_kilometraje != null);
+                                const proxKms = latestMaintenanceWithOilChange?.prox_kilometraje;
                                 return (
                                     <div key={vehicle.id} className="bg-gray-50 p-4 rounded-xl border border-gray-100 client-vehicle-card">
                                         <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2b2828', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '4px' }}>

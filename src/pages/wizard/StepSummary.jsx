@@ -11,6 +11,7 @@ const StepSummary = ({ onPrev, formData }) => {
     const total = totalParts + totalLabor;
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [includeOilChange, setIncludeOilChange] = useState(false);
 
     const handleConfirm = async () => {
         setLoading(true);
@@ -18,7 +19,7 @@ const StepSummary = ({ onPrev, formData }) => {
         const payload = {
             vehicle_id: formData.vehicle.id,
             kilometraje: parseInt(formData.service.kilometraje) || 0, // El nuevo kilometraje ingresado
-            prox_kilometraje: parseInt(formData.service.kilometraje) ? parseInt(formData.service.kilometraje) + 5000 : null, // Sugerimos prox + 5000km
+            prox_kilometraje: includeOilChange && parseInt(formData.service.kilometraje) ? parseInt(formData.service.kilometraje) + 5000 : null, // Sugerimos prox + 5000km o lo anulamos
             fecha: new Date().toISOString().split('T')[0], // Hoy
             observaciones: formData.service.description,
             parts: (formData.service.parts || []).map(p => ({
@@ -72,6 +73,20 @@ const StepSummary = ({ onPrev, formData }) => {
                         Observaciones
                     </h4>
                     <p style={{ fontStyle: 'italic', color: '#555', wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}>{formData.service.description || "Ninguna."}</p>
+
+                    {/* CHECKBOX Cambio de Aceite */}
+                    <div style={{ marginTop: '2rem', padding: '1rem', background: '#e0f2fe', borderRadius: '8px', border: '1px solid #bae6fd', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <input 
+                            type="checkbox" 
+                            id="oilChangeCheck" 
+                            checked={includeOilChange}
+                            onChange={(e) => setIncludeOilChange(e.target.checked)}
+                            style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                        />
+                        <label htmlFor="oilChangeCheck" style={{ cursor: 'pointer', fontWeight: '500', color: '#0369a1', margin: 0 }}>
+                            ¿Incluir Cambio de Aceite? (+5,000 km para el próximo mantenimiento)
+                        </label>
+                    </div>
                 </div>
 
                 {/* Totales Derecha */}
