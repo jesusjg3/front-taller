@@ -15,7 +15,8 @@ const StepVehicle = ({ onNext, onPrev, formData, setFormData }) => {
             try {
                 // Obtener el cliente directamente para traer todos sus vehículos (sin problemas de paginación)
                 const response = await axios.get(`/clients/${formData.client.id}`);
-                const clientVehicles = response.data.vehicles || [];
+                // Filtrar para no mostrar vehículos eliminados (soft deletes)
+                const clientVehicles = (response.data.vehicles || []).filter(v => v.deleted_at === null);
                 setVehicles(clientVehicles);
             } catch (error) {
                 console.error("Error cargando vehículos:", error);
