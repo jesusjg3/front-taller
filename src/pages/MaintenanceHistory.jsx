@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, User, Car, Eye } from 'lucide-react';
+import { Search, Calendar, User, Car, Eye, Trash2 } from 'lucide-react';
 import axios from '../api/axios';
 
 const MaintenanceHistory = () => {
@@ -22,6 +22,19 @@ const MaintenanceHistory = () => {
             console.error("Error fetching maintenances:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id, e) => {
+        e.stopPropagation();
+        if (window.confirm('¿Está seguro de eliminar este registro de mantenimiento? Esta acción no se puede deshacer.')) {
+            try {
+                await axios.delete(`/maintenances/${id}`);
+                setMaintenances(prev => prev.filter(m => m.id !== id));
+            } catch (error) {
+                console.error("Error eliminando mantenimiento:", error);
+                alert("Hubo un error al eliminar el registro.");
+            }
         }
     };
 
@@ -126,15 +139,24 @@ const MaintenanceHistory = () => {
                                     <td className="p-4 text-right font-bold text-gray-800 whitespace-nowrap">
                                         ${item.total_cost ? parseFloat(item.total_cost).toFixed(2) : '0.00'}
                                     </td>
-                                    <td className="p-4 text-center whitespace-nowrap">
-                                        <Link
-                                            to={`/maintenances/${item.id}`}
-                                            className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-colors inline-flex"
-                                            onClick={(e) => e.stopPropagation()}
-                                            title="Ver Detalles"
-                                        >
-                                            <Eye size={18} />
-                                        </Link>
+                                    <td className="p-4 whitespace-nowrap">
+                                        <div className="flex justify-center items-center gap-3">
+                                            <Link
+                                                to={`/maintenances/${item.id}`}
+                                                className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors inline-flex"
+                                                onClick={(e) => e.stopPropagation()}
+                                                title="Ver Detalles"
+                                            >
+                                                <Eye size={20} />
+                                            </Link>
+                                            <button
+                                                className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors inline-flex"
+                                                onClick={(e) => handleDelete(item.id, e)}
+                                                title="Eliminar Registro"
+                                            >
+                                                <Trash2 size={20} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))

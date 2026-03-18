@@ -13,14 +13,9 @@ const StepVehicle = ({ onNext, onPrev, formData, setFormData }) => {
         const fetchVehicles = async () => {
             setLoading(true);
             try {
-                // Asumiendo que el backend retorna todos y filtramos aquí
-                const response = await axios.get('/vehicles');
-
-                // Asegurar que sea array (algunos backends envuelven en { data: [...] })
-                const allVehicles = Array.isArray(response.data) ? response.data : (response.data.data || []);
-
-                // Filtrar solo los del cliente seleccionado
-                const clientVehicles = allVehicles.filter(v => v.client_id === formData.client.id);
+                // Obtener el cliente directamente para traer todos sus vehículos (sin problemas de paginación)
+                const response = await axios.get(`/clients/${formData.client.id}`);
+                const clientVehicles = response.data.vehicles || [];
                 setVehicles(clientVehicles);
             } catch (error) {
                 console.error("Error cargando vehículos:", error);
