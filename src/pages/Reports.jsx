@@ -13,24 +13,30 @@ const formatCurrency = (amount) => {
 const Reports = () => {
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
+    const [viewMode, setViewMode] = useState('weekly');
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [password, setPassword] = useState('');
 
     const [totals, setTotals] = useState({ labor: 0, parts: 0, total: 0 });
     const [maxRevenue, setMaxRevenue] = useState(0);
 
     useEffect(() => {
-        fetchReport();
+        if (isAuthenticated) {
+            fetchReport();
+        }
         // eslint-disable-next-line
-    }, [year, month]);
+    }, [year, month, viewMode, isAuthenticated]);
 
     const fetchReport = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`/reports/weekly-revenue?year=${year}&month=${month}`);
+            const response = await axios.get(`/reports/revenue?year=${year}&month=${month}&mode=${viewMode}`);
             const reportData = response.data.data;
             setData(reportData);
-            
+
             // Calculate totals and max value for chart scaling
             let tLabor = 0;
             let tParts = 0;
@@ -74,22 +80,60 @@ const Reports = () => {
         { value: 12, label: 'Diciembre' },
     ];
 
+    const handleLogin = (e) => {
+        e.preventDefault();
+        // Use environment variable for better security, fallback to simple password if missing
+        const validPassword = process.env.REACT_APP_REPORTS_PASSWORD;
+        if (password === validPassword) {
+            setIsAuthenticated(true);
+        } else {
+            alert('Contraseña incorrecta');
+        }
+    };
+
+    if (!isAuthenticated) {
+        return (
+            <div className="reports-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '100%', maxWidth: '400px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                        <BarChart3 size={48} color="#3b82f6" />
+                    </div>
+                    <h2 style={{ textAlign: 'center', margin: 0, paddingBottom: '1rem', borderBottom: '1px solid #eee' }}>Acceso a Reportes</h2>
+                    <p style={{ textAlign: 'center', color: '#666', fontSize: '0.9rem' }}>Ingrese la contraseña de administrador para ver esta sección.</p>
+                    <input
+                        type="password"
+                        placeholder="Contraseña"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '1rem' }}
+                        autoFocus
+                    />
+                    <button type="submit" className="primary-btn" style={{ padding: '0.75rem', fontSize: '1rem' }}>Ingresar</button>
+                </form>
+            </div>
+        );
+    }
+
     return (
         <div className="reports-container">
             <header className="reports-header">
                 <h1><BarChart3 size={32} color="#3b82f6" /> Reportes de Ingresos</h1>
-                
+
                 <div className="month-selector">
+                    <select value={viewMode} onChange={(e) => setViewMode(e.target.value)}>
+                        <option value="weekly">Semanal</option>
+                        <option value="daily">Diario</option>
+                    </select>
                     <select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
                         {months.map(m => (
                             <option key={m.value} value={m.value}>{m.label}</option>
                         ))}
                     </select>
-                    <input 
-                        type="number" 
-                        value={year} 
-                        onChange={(e) => setYear(Number(e.target.value))} 
-                        min="2020" 
+                    <input
+                        type="number"
+                        value={year}
+                        onChange={(e) => setYear(Number(e.target.value))}
+                        min="2020"
                         step="1"
                     />
                     <button className="primary-btn" onClick={fetchReport} style={{ padding: '0.5rem', display: 'flex' }}>
@@ -121,35 +165,35 @@ const Reports = () => {
                     </div>
 
                     <div className="chart-section">
-                        <h2>Ingresos por Semana</h2>
-                        
+                        <h2>Ingresos por {viewMode === 'weekly' ? 'Semana' : 'Día'}</h2>
+
                         {data.length === 0 ? (
                             <div className="empty-state">
                                 No se encontraron ingresos registrados en este mes.
                             </div>
                         ) : (
                             <div className="bar-chart">
-                                {data.map((week, index) => {
-                                    const laborPct = (Number(week.total_labor) / maxRevenue) * 100;
-                                    const partsPct = (Number(week.total_parts) / maxRevenue) * 100;
+                                {data.map((item, index) => {
+                                    const laborPct = (Number(item.total_labor) / maxRevenue) * 100;
+                                    const partsPct = (Number(item.total_parts) / maxRevenue) * 100;
 
                                     return (
                                         <div key={index} className="bar-row">
-                                            <div className="bar-label">{week.week_label}</div>
+                                            <div className="bar-label" style={{ fontSize: viewMode === 'daily' ? '0.85rem' : '1rem' }}>{item.label}</div>
                                             <div className="bar-track">
                                                 {laborPct > 0 && (
-                                                    <div className="bar-fill labor" style={{ width: `${laborPct}%` }} title={`Mano de Obra: ${formatCurrency(week.total_labor)}`}>
+                                                    <div className="bar-fill labor" style={{ width: `${laborPct}%` }} title={`Mano de Obra: ${formatCurrency(item.total_labor)}`}>
                                                         {laborPct > 10 && 'M.O.'}
                                                     </div>
                                                 )}
                                                 {partsPct > 0 && (
-                                                    <div className="bar-fill parts" style={{ width: `${partsPct}%` }} title={`Repuestos: ${formatCurrency(week.total_parts)}`}>
+                                                    <div className="bar-fill parts" style={{ width: `${partsPct}%` }} title={`Repuestos: ${formatCurrency(item.total_parts)}`}>
                                                         {partsPct > 10 && 'Rep.'}
                                                     </div>
                                                 )}
                                             </div>
                                             <div className="bar-value">
-                                                {formatCurrency(week.total_revenue)}
+                                                {formatCurrency(item.total_revenue)}
                                             </div>
                                         </div>
                                     );
